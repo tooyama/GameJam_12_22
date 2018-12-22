@@ -9,22 +9,50 @@ public class SpawnerManager : MonoBehaviour
     [SerializeField]
     float spawnTime = 1.0f;
 
+    bool isActive = false;
+    bool isUpdate = false;
 
-	void Start () 
+    public bool IsUpdate
     {
+        get
+        {
+            return isUpdate;
+        }
+        set
+        {
+            spawnTime = spawnTime *= 0.8f;
+            isUpdate = value;
+        }
+    }
+
+    public void SetSpawn()
+    {
+        isActive = true;
         StartCoroutine(WaitForSpawn());
-	}
+    }
+
+    public void End()
+    {
+        isActive = false;
+    }
 
     IEnumerator WaitForSpawn()
     {
-        yield return new WaitForSeconds(spawnTime);
-
         int enemyId = Random.Range(0, enemyObjects.Length);
         Vector3 devision = new Vector3(Random.Range(-0.1f, 0.1f), 0, Random.Range(-0.1f, 0.1f));
 
-        Instantiate(enemyObjects[enemyId],transform.position+devision,transform.rotation);
+        GameObject enemy = Instantiate(enemyObjects[enemyId],transform.position+devision,transform.rotation) as GameObject;
 
-        StartCoroutine(WaitForSpawn());
+        if(isUpdate)
+        {
+            enemy.GetComponent<EnemyManager>().AddSpeed();
+        }
+
+        yield return new WaitForSeconds(spawnTime);
+
+        if(isActive)
+        {
+            StartCoroutine(WaitForSpawn());   
+        }
     }
-	
 }
